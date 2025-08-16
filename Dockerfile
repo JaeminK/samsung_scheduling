@@ -6,7 +6,6 @@ WORKDIR /workspace
 
 # Set environment variables
 ENV PYTHONPATH=/workspace
-ENV CUDA_VISIBLE_DEVICES=0,1
 ENV NCCL_DEBUG=INFO
 ENV NCCL_IB_DISABLE=1
 
