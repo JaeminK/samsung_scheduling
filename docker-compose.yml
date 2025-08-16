@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  autotp:
+    build: .
+    container_name: autotp-container # Change the name if needed
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all 
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    volumes:
+      - .:/workspace
+      - ./cache:/workspace/cache
+    working_dir: /workspace
+    command: /bin/bash
+    stdin_open: true
+    tty: true
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

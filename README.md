@@ -1,5 +1,7 @@
 # AutoTP: Automatic Tensor & Pipeline Parallelism
 
+> **GitHub Repository**: [https://github.com/JaeminK/samsung_scheduling.git](https://github.com/JaeminK/samsung_scheduling.git)
+
 ## 프로젝트 개요
 
 AutoTP는 단일 GPU HuggingFace 모델을 자동으로 Tensor Parallel과 Pipeline Parallel 모델로 변환하는 프로젝트입니다. 이 프로젝트는 분산 학습의 핵심 개념들을 구현하는 4가지 과제로 구성되어 있습니다.
@@ -27,7 +29,7 @@ AutoTP는 단일 GPU HuggingFace 모델을 자동으로 Tensor Parallel과 Pipel
 ## 📁 프로젝트 구조
 
 ```
-AutoTP/
+samsung_scheduling/
 ├── src/autotp/
 │   ├── layer.py          # Problem 1, 2 구현 위치
 │   ├── utils.py          # Problem 3, 4 구현 위치
@@ -42,17 +44,45 @@ AutoTP/
 │   └── run_pp_rank1.sh   # Pipeline Parallel Rank 1 디버깅용
 ├── main.py              # 메인 실행 파일
 ├── requirements.txt     # 의존성 패키지
+├── Dockerfile          # Docker 이미지 빌드 파일
+├── docker-compose.yml  # Docker Compose 설정
+├── .dockerignore       # Docker 빌드 제외 파일
 └── README.md           # 이 파일
 ```
 
 ## 🚀 설치 및 실행
 
-### 1. 환경 설정
+### 1. Docker를 사용한 설치 (권장)
+
+**Docker 설치:**
+```bash
+# 저장소 클론
+git clone https://github.com/JaeminK/samsung_scheduling.git
+cd samsung_scheduling
+
+# Docker 이미지 빌드
+docker build -t autotp .
+
+# Docker Compose로 실행 (권장)
+docker-compose up -d
+docker-compose exec autotp bash
+```
+
+**또는 직접 Docker 실행:**
+```bash
+# GPU 지원으로 컨테이너 실행
+docker run --gpus all -it --rm \
+    -v $(pwd):/workspace \
+    -v $(pwd)/cache:/workspace/cache \
+    autotp
+```
+
+### 2. 로컬 환경 설정
 
 ```bash
 # 저장소 클론
-git clone https://github.com/yourusername/AutoTP.git
-cd AutoTP
+git clone https://github.com/JaeminK/samsung_scheduling.git
+cd samsung_scheduling
 
 # 패키지 설치
 pip install .
@@ -105,6 +135,19 @@ cd benchmarks
 ```
 
 > **참고**: `run_*_rank*.sh` 스크립트는 pdb 디버깅을 위한 개별 GPU 실행용이고, `test_*_dist.sh` 스크립트는 `torchrun`을 사용한 자동 분산 실행용입니다.
+
+### 6. GPU 설정 변경
+
+모든 스크립트에서 사용할 GPU를 변경하려면:
+
+```bash
+# 스크립트 상단의 CUDA_VISIBLE_DEVICES 값을 수정
+export CUDA_VISIBLE_DEVICES=0,1  # GPU 0, 1 사용
+export CUDA_VISIBLE_DEVICES=2,3  # GPU 2, 3 사용
+export CUDA_VISIBLE_DEVICES=0,1,2,3  # GPU 0, 1, 2, 3 사용
+```
+
+**주의**: `CUDA_VISIBLE_DEVICES`에 지정한 GPU 개수와 `--nproc_per_node` 값이 일치해야 합니다.
 
 ## 📋 요구사항
 

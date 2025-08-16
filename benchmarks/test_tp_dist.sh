@@ -1,4 +1,7 @@
 #! /bin/bash
+
+# GPU 설정 (원하는 GPU 번호로 변경하세요)
+export CUDA_VISIBLE_DEVICES=0,1
 export CUDA_LAUNCH_BLOCKING=1
 
 # nsys profile --trace=cuda,nvtx --cuda-graph=node -o ./tp_dist --force-overwrite true \
