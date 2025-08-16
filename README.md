@@ -44,9 +44,8 @@ samsung_scheduling/
 │   └── run_pp_rank1.sh   # Pipeline Parallel Rank 1 디버깅용
 ├── main.py              # 메인 실행 파일
 ├── requirements.txt     # 의존성 패키지
-├── Dockerfile          # Docker 이미지 빌드 파일
-├── docker-compose.yml  # Docker Compose 설정
-├── .dockerignore       # Docker 빌드 제외 파일
+├── run_docker.sh        # Docker 컨테이너 실행 스크립트
+├── setup_container.sh   # 컨테이너 내부 설정 스크립트
 └── README.md           # 이 파일
 ```
 
@@ -54,65 +53,65 @@ samsung_scheduling/
 
 ### 1. Docker를 사용한 설치 (권장)
 
-**Docker 설치:**
+**Docker 컨테이너 실행:**
 ```bash
 # 저장소 클론
 git clone https://github.com/JaeminK/samsung_scheduling.git
 cd samsung_scheduling
 
-# Docker 이미지 빌드
-docker build -t autotp .
+# Docker 컨테이너 실행
+./run_docker.sh
 
-# Docker Compose로 실행 (권장)
-docker-compose up -d
-docker-compose exec autotp bash
+# 또는 컨테이너 이름 지정
+./run_docker.sh my-container-name
 ```
 
 **또는 직접 Docker 실행:**
 ```bash
 # GPU 지원으로 컨테이너 실행
-docker run --gpus all -it --rm \
-    -v $(pwd):/workspace \
-    -v $(pwd)/cache:/workspace/cache \
-    autotp
+docker run -it \
+    --gpus all \
+    --ipc=host \
+    --net=host \
+    --name=autotp-container \
+    -v ../:/workspace \
+    nvcr.io/nvidia/pytorch:23.10-py3 \
+    bash
 ```
 
-### 2. 로컬 환경 설정
+### 2. 컨테이너 내부 설정
+
+Docker 컨테이너 내부에서 다음 명령어를 실행하세요:
 
 ```bash
-# 저장소 클론
-git clone https://github.com/JaeminK/samsung_scheduling.git
-cd samsung_scheduling
+cd /workspace/samsung_scheduling
 
-# 패키지 설치
-pip install .
-
-# 의존성 설치
-pip install -r requirements.txt
+# 컨테이너 설정 스크립트 실행
+./setup_container.sh
 ```
 
-### 2. 단일 GPU 테스트
+### 3. 단일 GPU 테스트
 
 ```bash
 cd benchmarks
 python test_single.sh
 ```
 
-### 3. Tensor Parallel 분산 테스트
+### 4. Tensor Parallel 분산 테스트
 
 ```bash
 cd benchmarks
 python test_tp_dist.sh
 ```
 
-### 4. Pipeline Parallel 분산 테스트
+### 5. Pipeline Parallel 분산 테스트
 
 ```bash
 cd benchmarks
 python test_pp_dist.sh
 ```
 
-### 5. 디버깅용 테스트 (개별 GPU 실행)
+### 6. 디버깅용 테스트 (개별 GPU 실행)
 
 **Tensor Parallel 디버깅:**
 ```bash
@@ -136,7 +135,7 @@ cd benchmarks
 
 > **참고**: `run_*_rank*.sh` 스크립트는 pdb 디버깅을 위한 개별 GPU 실행용이고, `test_*_dist.sh` 스크립트는 `torchrun`을 사용한 자동 분산 실행용입니다.
 
-### 6. GPU 설정 변경
+### 7. GPU 설정 변경
 
 모든 스크립트에서 사용할 GPU를 변경하려면:
 
