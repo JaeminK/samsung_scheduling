@@ -75,6 +75,7 @@ docker run -it \
     --net=host \
     --name=autotp-container \
     -v ../:/workspace \
+    -v ~/workspace/cache:/workspace/cache \
     nvcr.io/nvidia/pytorch:23.10-py3 \
     bash
 ```
