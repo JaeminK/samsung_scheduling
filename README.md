@@ -2,11 +2,11 @@
 
 ## 프로젝트 개요
 
-AutoTP는 단일 GPU HuggingFace 모델을 자동으로 Tensor Parallel과 Pipeline Parallel 모델로 변환하는 프로젝트입니다. 이 프로젝트는 분산 학습의 핵심 개념들을 구현하는 5가지 과제로 구성되어 있습니다.
+AutoTP는 단일 GPU HuggingFace 모델을 자동으로 Tensor Parallel과 Pipeline Parallel 모델로 변환하는 프로젝트입니다. 이 프로젝트는 분산 학습의 핵심 개념들을 구현하는 4가지 과제로 구성되어 있습니다.
 
 ## 🎯 구현 과제
 
-이 프로젝트는 다음과 같은 5가지 핵심 과제로 구성되어 있습니다:
+이 프로젝트는 다음과 같은 4가지 핵심 과제로 구성되어 있습니다:
 
 ### Problem 1: Tensor Parallelism 구현
 - **ColumnParallelLinear**: 입력을 여러 GPU로 분할하여 병렬 처리
@@ -23,9 +23,6 @@ AutoTP는 단일 GPU HuggingFace 모델을 자동으로 Tensor Parallel과 Pipel
 ### Problem 4: Pipeline Parallel Stage Construction 구현
 - 각 레이어를 PipelineParallelTransformerLayer로 래핑
 - 스테이지 내에서의 위치 정보 설정
-
-### Problem 5: 통합 시스템 구현
-- Tensor Parallelism과 Pipeline Parallelism을 결합한 완전한 분산 학습 시스템
 
 ## 📁 프로젝트 구조
 
