@@ -1,5 +1,5 @@
 # Use NVIDIA CUDA base image with PyTorch
-FROM nvcr.io/nvidia/pytorch:23.12-py3
+FROM nvcr.io/nvidia/pytorch:23.10-py3
 
 # Set working directory
 WORKDIR /workspace
