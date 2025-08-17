@@ -18,7 +18,7 @@ AutoTP는 단일 GPU HuggingFace 모델을 자동으로 Tensor Parallel과 Pipel
 - **PipelineParallelTransformerLayer**: 스테이지 간 데이터 전송을 위한 send/recv 연산
 - 스테이지의 첫 번째/마지막 레이어에서만 통신 수행
 
-### Problem 3: Layer Parallelization 구현
+### Problem 3: Tensor Parallel Stage Construction 구현
 - **Attention Layer**: Query/Key/Value는 Column Parallel, Output은 Row Parallel
 - **MLP Layer**: Up projection은 Column Parallel, Down projection은 Row Parallel
 
@@ -75,7 +75,6 @@ docker run -it \
     --net=host \
     --name=autotp-container \
     -v ../:/workspace \
-    -v ~/workspace/cache:/workspace/cache \
     nvcr.io/nvidia/pytorch:23.10-py3 \
     bash
 ```
