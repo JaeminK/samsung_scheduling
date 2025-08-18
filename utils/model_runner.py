@@ -7,7 +7,7 @@ import torch
 import transformers
 from transformers import AutoModelForCausalLM, StaticCache
 
-from autotp import load_or_create_tp_model, load_or_create_pp_model, ModelWrapper
+from autodist import load_or_create_tp_model, load_or_create_pp_model, ModelWrapper
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 

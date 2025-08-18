@@ -4,7 +4,7 @@ set -euo pipefail
 # Docker 컨테이너 실행 스크립트
 # 사용법: ./run_docker.sh [container_name]
 
-# 컨테이너 이름 (기본값: autotp-container)
+# 컨테이너 이름 (기본값: autodist-container)
 CONTAINER_NAME="${1:-autodist-container}"
 
 # 이미지 (필요 시 변경)
