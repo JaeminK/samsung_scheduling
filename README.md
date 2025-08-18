@@ -1,38 +1,42 @@
-# AutoTP: Automatic Tensor & Pipeline Parallelism
+# AutoDist: Automatic Tensor & Pipeline Parallelism
 
 > **GitHub Repository**: [https://github.com/JaeminK/samsung_scheduling.git](https://github.com/JaeminK/samsung_scheduling.git)
 
 ## 프로젝트 개요
 
-AutoTP는 단일 GPU HuggingFace 모델을 자동으로 Tensor Parallel과 Pipeline Parallel 모델로 변환하는 프로젝트입니다. 이 프로젝트는 분산 학습의 핵심 개념들을 구현하는 4가지 과제로 구성되어 있습니다.
+AutoDist는 단일 GPU HuggingFace 모델을 자동으로 Tensor Parallel과 Pipeline Parallel 모델로 변환하는 프로젝트입니다. 이 프로젝트는 분산 학습의 핵심 개념들을 구현하는 4가지 과제로 구성되어 있습니다.
 
 ## 🎯 구현 과제
 
 이 프로젝트는 다음과 같은 4가지 핵심 과제로 구성되어 있습니다:
 
-### Problem 1: Tensor Parallelism 구현
-- **ColumnParallelLinear**: 입력을 여러 GPU로 분할하여 병렬 처리
-- **RowParallelLinear**: 각 GPU가 출력의 일부를 계산하고 all_reduce로 합산
 
-### Problem 2: Pipeline Parallelism 구현
+
+### Problem 1: Pipeline Parallelism 구현
 - **PipelineParallelTransformerLayer**: 스테이지 간 데이터 전송을 위한 send/recv 연산
 - 스테이지의 첫 번째/마지막 레이어에서만 통신 수행
 
-### Problem 3: Tensor Parallel Stage Construction 구현
+### Problem 2: Pipeline Parallel Stage Construction 구현
+- 각 레이어를 PipelineParallelTransformerLayer로 래핑
+- 스테이지 내에서의 위치 정보 설정
+
+### Problem 3: Tensor Parallelism 구현
+- **ColumnParallelLinear**: 입력을 여러 GPU로 분할하여 병렬 처리
+- **RowParallelLinear**: 각 GPU가 출력의 일부를 계산하고 all_reduce로 합산
+
+### Problem 4: Tensor Parallel Stage Construction 구현
 - **Attention Layer**: Query/Key/Value는 Column Parallel, Output은 Row Parallel
 - **MLP Layer**: Up projection은 Column Parallel, Down projection은 Row Parallel
 
-### Problem 4: Pipeline Parallel Stage Construction 구현
-- 각 레이어를 PipelineParallelTransformerLayer로 래핑
-- 스테이지 내에서의 위치 정보 설정
+
 
 ## 📁 프로젝트 구조
 
 ```
 samsung_scheduling/
-├── src/autotp/
-│   ├── layer.py          # Problem 1, 2 구현 위치
-│   ├── utils.py          # Problem 3, 4 구현 위치
+├── src/autoDist/
+│   ├── layer.py          # Problem 1, 3 구현 위치
+│   ├── utils.py          # Problem 2, 4 구현 위치
 │   └── solutions.md      # 모든 문제의 정답과 상세 설명
 ├── benchmarks/           # 테스트 스크립트
 │   ├── test_single.sh    # 단일 GPU 테스트
@@ -73,7 +77,7 @@ docker run -it \
     --gpus all \
     --ipc=host \
     --net=host \
-    --name=autotp-container \
+    --name=autoDist-container \
     -v ../:/workspace \
     nvcr.io/nvidia/pytorch:23.10-py3 \
     bash
@@ -167,5 +171,5 @@ export CUDA_VISIBLE_DEVICES=0,1,2,3  # GPU 0, 1, 2, 3 사용
 
 ---
 
-**참고**: 구현 과제의 정답은 `src/autotp/solutions.md` 파일을 참조하세요.
+**참고**: 구현 과제의 정답은 `src/autoDist/solutions.md` 파일을 참조하세요.
 

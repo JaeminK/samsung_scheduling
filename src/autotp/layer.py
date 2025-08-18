@@ -27,7 +27,7 @@ class ColumnParallelLinear(torch.nn.Linear):
 
     def forward(self, input: torch.Tensor):
         import pdb; pdb.set_trace()
-        # Problem 1: Column Parallel Linear Layer Implementation
+        # Problem 3: Column Parallel Linear Layer Implementation
         """
         구현해야 할 내용:
         1. 입력 텐서 input에 대해 선형 변환을 수행하세요
@@ -56,7 +56,7 @@ class RowParallelLinear(torch.nn.Linear):
 
     def forward(self, input: torch.Tensor):
         import pdb; pdb.set_trace()
-        # Problem 1: Row Parallel Linear Layer Implementation
+        # Problem 3: Row Parallel Linear Layer Implementation
         """
         구현해야 할 내용:
         1. 입력 텐서 input에 대해 선형 변환을 수행하세요
@@ -165,7 +165,7 @@ class PipelineParallelTransformerLayer(torch.nn.Module):
 
     def forward(self, *args, **kwargs):
         import pdb; pdb.set_trace()
-        # Problem 2: Pipeline Parallel Transformer Layer Implementation
+        # Problem 1: Pipeline Parallel Transformer Layer Implementation
         """
         구현해야 할 내용:
         1. 현재 스테이지가 첫 번째 스테이지가 아니고, 이 레이어가 스테이지의 첫 번째 레이어인 경우:

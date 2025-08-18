@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='autotp',  # Replace with your desired package name
+    name='autodist',  # Replace with your desired package name
     version='0.1',
     packages=find_packages(where='src'),  # Automatically find packages in the src directory
     package_dir={'': 'src'},

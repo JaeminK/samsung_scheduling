@@ -114,7 +114,7 @@ def convert_to_tensor_parallel(model: torch.nn.Module, weights: dict, rank: int 
         elif _is_linear(module):
             if _is_self_attention(name):
                 import pdb; pdb.set_trace()
-                # Problem 3: Attention Layer Parallelization Implementation
+                # Problem 4: Attention Layer Parallelization Implementation
                 """
                 구현해야 할 내용:
                 Attention 레이어의 Query, Key, Value, Output projection을 병렬화하세요.
@@ -147,7 +147,7 @@ def convert_to_tensor_parallel(model: torch.nn.Module, weights: dict, rank: int 
                 modules_to_replace[name] = ColumnParallelLinear(split_weight_tensor, module.bias, None, gather_output=True)
             else:
                 import pdb; pdb.set_trace()
-                # Problem 3: MLP Layer Parallelization Implementation
+                # Problem 4: MLP Layer Parallelization Implementation
                 """
                 구현해야 할 내용:
                 MLP 레이어의 Up projection과 Down projection을 병렬화하세요.
@@ -378,7 +378,7 @@ def convert_to_pipeline_parallel(model: torch.nn.Module, stage_info: dict, stage
         for i in range(stage_info['layers_start'], stage_info['layers_end']):
             layer = transformer_layers[i]
             import pdb; pdb.set_trace()
-            # Problem 4: Pipeline Parallel Stage Construction Implementation
+            # Problem 2: Pipeline Parallel Stage Construction Implementation
             """
             구현해야 할 내용:
             Pipeline Parallel을 위한 스테이지별 레이어 래핑을 구현하세요.
