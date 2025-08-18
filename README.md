@@ -98,21 +98,21 @@ cd /workspace/samsung_scheduling
 
 ```bash
 cd benchmarks
-python test_single.sh
+bash test_single.sh
 ```
 
 ### 4. Tensor Parallel 분산 테스트
 
 ```bash
 cd benchmarks
-python test_tp_dist.sh
+bash test_tp_dist.sh
 ```
 
 ### 5. Pipeline Parallel 분산 테스트
 
 ```bash
 cd benchmarks
-python test_pp_dist.sh
+bash test_pp_dist.sh
 ```
 
 ### 6. 디버깅용 테스트 (개별 GPU 실행)
