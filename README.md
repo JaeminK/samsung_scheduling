@@ -58,9 +58,10 @@ samsung_scheduling/
 ### 0. 개인 디렉토리 생성
 ```bash
 mkdir {디렉토리 이름}
+cd {디렉토리 이름}
 ```
 
-### 1. Docker를 사용한 설치 (권장)
+### 1. Docker를 사용한 설치
 
 **Docker 컨테이너 실행:**
 ```bash
@@ -68,11 +69,9 @@ mkdir {디렉토리 이름}
 git clone https://github.com/JaeminK/samsung_scheduling.git
 cd samsung_scheduling
 
-# Docker 컨테이너 실행
-./run_docker.sh
-
-# 또는 컨테이너 이름 지정
-./run_docker.sh my-container-name
+# 컨테이너 이름 지정하여 실행
+# 저번 실습과 다른 도커 이름 지정
+./run_docker.sh {nickname}
 ```
 
 ### 2. 컨테이너 내부 설정
