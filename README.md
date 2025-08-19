@@ -86,7 +86,7 @@ cd /workspace/samsung_scheduling
 ./setup_container.sh
 ```
 
-### 3. 단일 GPU 테스트
+### 3. 단일 GPU 테스트 (모델 다운로드)
 
 ```bash
 cd benchmarks
