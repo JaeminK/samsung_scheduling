@@ -55,6 +55,11 @@ samsung_scheduling/
 
 ## 🚀 설치 및 실행
 
+### 0. 개인 디렉토리 생성
+```bash
+mkdir {디렉토리 이름}
+```
+
 ### 1. Docker를 사용한 설치 (권장)
 
 **Docker 컨테이너 실행:**
