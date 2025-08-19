@@ -75,19 +75,6 @@ cd samsung_scheduling
 ./run_docker.sh my-container-name
 ```
 
-**또는 직접 Docker 실행:**
-```bash
-# GPU 지원으로 컨테이너 실행
-docker run -it \
-    --gpus all \
-    --ipc=host \
-    --net=host \
-    --name=autoDist-container \
-    -v ../:/workspace \
-    nvcr.io/nvidia/pytorch:23.10-py3 \
-    bash
-```
-
 ### 2. 컨테이너 내부 설정
 
 Docker 컨테이너 내부에서 다음 명령어를 실행하세요:
