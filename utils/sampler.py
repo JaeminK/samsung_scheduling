@@ -27,13 +27,14 @@ class Sampler(torch.nn.Module):
     
 
 class DistributedSampler:
-    def __init__(self, vocab_size, tensor_parallel_size, pipeline_parallel_size, local_rank, world_size, eos_token_id, max_output_length):
+    def __init__(self, vocab_size, tensor_parallel_size, pipeline_parallel_size, local_rank, world_size, eos_token_ids, max_output_length):
         self.vocab_size = vocab_size
         self.tensor_parallel_size = tensor_parallel_size
         self.pipeline_parallel_size = pipeline_parallel_size
         self.local_rank = local_rank
         self.world_size = world_size
-        self.eos_token_id = eos_token_id
+        self.eos_token_ids = eos_token_ids
+        self.eos_token_ids_tensor = torch.tensor(self.eos_token_ids, device=torch.cuda.current_device())
         self.max_output_length = max_output_length
         
         self.should_sample = self._determine_sampling_rank()
@@ -86,9 +87,9 @@ class DistributedSampler:
         stop_flag = False
         eos_index = -1
         
-        for eos_token in [self.eos_token_id]:
-            if eos_token in new_tokens:
-                eos_index = torch.where(new_tokens == eos_token)[0][0].item()
+        eos_mask = torch.isin(new_tokens, self.eos_token_ids_tensor)
+        if eos_mask.any():
+            eos_index = torch.where(eos_mask)[0][0].item()
 
         if eos_index != -1:
             output_ids = torch.cat([output_ids, new_tokens[0][:eos_index+1]], dim=0)

@@ -27,6 +27,26 @@ def parse_args():
     parser.add_argument("--max-output-length", type=int, default=157)
     return parser.parse_args()
 
+def get_eos_token_ids(tokenizer, model_runner):
+    if isinstance(tokenizer.eos_token_id, list):
+        eos_token_ids = tokenizer.eos_token_id
+    else:
+        eos_token_ids = [tokenizer.eos_token_id]
+    
+    if isinstance(tokenizer.pad_token_id, list):
+        pad_token_ids = tokenizer.pad_token_id
+    else:
+        pad_token_ids = [tokenizer.pad_token_id]
+    
+    gen_config_eos_id = model_runner.model.model.generation_config.eos_token_id
+    if isinstance(gen_config_eos_id, list):
+        eos_token_ids.extend(gen_config_eos_id)
+    else:
+        eos_token_ids.append(gen_config_eos_id)
+
+    eos_token_ids.extend(pad_token_ids)
+    eos_token_ids = list(set(eos_token_ids))
+    return eos_token_ids
 
 def main():
     args = parse_args()
@@ -60,13 +80,15 @@ def main():
         capture_graph=True
     )
 
+    eos_token_ids = get_eos_token_ids(tokenizer, model_runner)
+
     sampler_manager = DistributedSampler(
         vocab_size=model_runner.model_config.vocab_size,
         tensor_parallel_size=args.tensor_parallel_size,
         pipeline_parallel_size=args.pipeline_parallel_size,
         local_rank=args.local_rank,
         world_size=args.world_size,
-        eos_token_id=tokenizer.eos_token_id,
+        eos_token_ids=eos_token_ids,
         max_output_length=args.max_output_length
     )
 
@@ -114,8 +136,6 @@ def main():
             print(tokenizer.decode([new_token]), end='', flush=True)
     
     torch.cuda.synchronize()
-    
-    print()
     
     if dist.is_initialized():
         dist.barrier()
