@@ -54,21 +54,18 @@ class LLMSpecEngine(LLMEngine):
             print(f"first_draft_input_ids: {draft_input_ids.cpu()}")
 
         # run draft model
-
-        with nvtx.annotate("run_draft_model"):
-            for draft_idx in range(self.num_draft_tokens):
-                draft_logits = self.draft_model_runner.run_model(input_ids=draft_input_ids, num_output_logits=1)
-                draft_token = self.sampler_manager.sample_and_distribute(draft_logits)
-                draft_input_ids = draft_token
-                self.draft_tokens_buffer[0, draft_idx].copy_(draft_token[0,-1])
+        for draft_idx in range(self.num_draft_tokens):
+            draft_logits = self.draft_model_runner.run_model(input_ids=draft_input_ids, num_output_logits=1)
+            draft_token = self.sampler_manager.sample_and_distribute(draft_logits)
+            draft_input_ids = draft_token
+            self.draft_tokens_buffer[0, draft_idx].copy_(draft_token[0,-1])
 
 
         target_input_ids = torch.cat([input_ids, self.draft_tokens_buffer], dim=1)
 
         # run target model
-        with nvtx.annotate("run_target_model"):
-            logits = self.model_runner.run_model(input_ids=target_input_ids, num_output_logits=self.num_draft_tokens+1)
-            target_tokens = self.sampler_manager.sample_and_distribute(logits)
+        logits = self.model_runner.run_model(input_ids=target_input_ids, num_output_logits=self.num_draft_tokens+1)
+        target_tokens = self.sampler_manager.sample_and_distribute(logits)
 
 
         # verify
