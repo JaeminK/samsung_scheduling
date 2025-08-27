@@ -26,23 +26,12 @@ class ColumnParallelLinear(torch.nn.Linear):
             self.bias.copy_(bias)
 
     def forward(self, input: torch.Tensor):
-        import pdb; pdb.set_trace()
-        # Problem 3: Column Parallel Linear Layer Implementation
-        """
-        구현해야 할 내용:
-        1. 입력 텐서 input에 대해 선형 변환을 수행하세요
-           - torch.nn.functional.linear(input, self.weight) 사용
-        2. bias가 존재하는 경우 bias를 더하세요
-           - self.bias가 None이 아닌 경우에만 수행
-        3. gather_output이 True인 경우에만 all_gather 연산을 수행하세요
-           - self.comm_utils.all_gather(output) 사용하여 모든 GPU의 출력을 수집
-        
-        함수 사용법:
-        - torch.nn.functional.linear(input, weight): 입력과 가중치의 선형 변환
-        - self.comm_utils.all_gather(tensor): 모든 GPU의 텐서를 수집하여 배치 차원으로 연결
-        
-        반환값: 최종 출력 텐서 (gather_output=True인 경우 모든 GPU의 출력이 연결된 텐서)
-        """
+        output = torch.nn.functional.linear(input, self.weight)
+        if self.bias is not None:
+            output += self.bias
+        if self.gather_output:
+            output = self.comm_utils.all_gather(output)
+        return output
 
 
 class RowParallelLinear(torch.nn.Linear):
@@ -55,26 +44,11 @@ class RowParallelLinear(torch.nn.Linear):
             self.bias.copy_(bias)
 
     def forward(self, input: torch.Tensor):
-        import pdb; pdb.set_trace()
-        # Problem 3: Row Parallel Linear Layer Implementation
-        """
-        구현해야 할 내용:
-        1. 입력 텐서 input에 대해 선형 변환을 수행하세요
-           - torch.nn.functional.linear(input, self.weight) 사용
-        2. all_reduce 연산을 수행하여 모든 GPU의 출력을 합산하세요
-           - self.comm_utils.all_reduce(output) 사용
-        3. bias가 존재하는 경우 bias를 더하세요
-           - self.bias가 None이 아닌 경우에만 수행
-        
-        함수 사용법:
-        - torch.nn.functional.linear(input, weight): 입력과 가중치의 선형 변환
-        - self.comm_utils.all_reduce(tensor): 모든 GPU의 텐서를 합산 (element-wise sum)
-        
-        주의사항: Row Parallel에서는 각 GPU가 출력의 일부를 계산하므로, 
-        all_reduce를 통해 모든 GPU의 결과를 합산해야 합니다.
-        
-        반환값: 모든 GPU의 출력이 합산된 최종 텐서
-        """
+        output = torch.nn.functional.linear(input, self.weight)
+        output = self.comm_utils.all_reduce(output)
+        if self.bias is not None:
+            output += self.bias
+        return output
 
 
 class PipelineParallelEmbedding(torch.nn.Module):
@@ -164,32 +138,13 @@ class PipelineParallelTransformerLayer(torch.nn.Module):
         return getattr(layer, name)
 
     def forward(self, *args, **kwargs):
-        import pdb; pdb.set_trace()
-        # Problem 1: Pipeline Parallel Transformer Layer Implementation
-        """
-        구현해야 할 내용:
-        1. 현재 스테이지가 첫 번째 스테이지가 아니고, 이 레이어가 스테이지의 첫 번째 레이어인 경우:
-           - 이전 스테이지로부터 입력을 받아야 합니다
-           - self.comm_utils.recv(hidden_states, self.stage_num - 1) 사용
-           - 받은 hidden_states로 args를 업데이트하세요
-        
-        2. 레이어의 forward 연산을 수행하세요
-           - self.layer(*args, **kwargs) 호출
-        
-        3. 현재 스테이지가 마지막 스테이지가 아니고, 이 레이어가 스테이지의 마지막 레이어인 경우:
-           - 다음 스테이지로 출력을 전송해야 합니다
-           - self.comm_utils.send(output, self.stage_num + 1) 사용
-        
-        함수 사용법:
-        - self.comm_utils.recv(tensor, src_rank): src_rank로부터 텐서를 수신
-        - self.comm_utils.send(tensor, dst_rank): dst_rank로 텐서를 전송
-        - self.layer(*args, **kwargs): 실제 transformer 레이어의 forward 연산
-        
-        조건 확인:
-        - is_first_layer_in_stage: 스테이지의 첫 번째 레이어인지 확인
-        - is_last_layer_in_stage: 스테이지의 마지막 레이어인지 확인
-        - stage_num: 현재 스테이지 번호 (0부터 시작)
-        
-        반환값: 레이어의 출력 (마지막 레이어가 아닌 경우 다음 스테이지로 전송됨)
-        """
         hidden_states = args[0]
+        if self.is_first_layer_in_stage and self.stage_num > 0:
+            hidden_states = self.comm_utils.recv(hidden_states, self.stage_num - 1)
+            args = (hidden_states,) + args[1:]
+
+        output = self.layer(*args, **kwargs)
+        
+        if self.is_last_layer_in_stage and self.stage_num < self.comm_utils.world_size - 1:
+            self.comm_utils.send(output, self.stage_num + 1)
+        return output

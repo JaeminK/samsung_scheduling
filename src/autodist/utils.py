@@ -113,69 +113,28 @@ def convert_to_tensor_parallel(model: torch.nn.Module, weights: dict, rank: int 
                 modules_to_replace[name] = TensorParallelEmbedding(split_weight_tensor, module.padding_idx, None)
         elif _is_linear(module):
             if _is_self_attention(name):
-                import pdb; pdb.set_trace()
-                # Problem 4: Attention Layer Parallelization Implementation
-                """
-                구현해야 할 내용:
-                Attention 레이어의 Query, Key, Value, Output projection을 병렬화하세요.
-                
-                1. Query, Key, Value projection (입력 projection):
-                   - _is_attention_projection(name) 함수로 확인
-                   - ColumnParallelLinear 사용 (입력을 여러 GPU로 분할)
-                   - weights[name]['weight'][rank]로 현재 GPU의 가중치 가져오기
-                   - bias가 있는 경우 weights[name]['bias'][rank] 사용
-                   - comm_utils는 None으로 설정 (이미 분할된 가중치 사용)
-                
-                2. Output projection (출력 projection):
-                   - Query, Key, Value가 아닌 경우 (else 블록)
-                   - RowParallelLinear 사용 (출력을 여러 GPU로 분할)
-                   - weights[name]['weight'][rank]로 현재 GPU의 가중치 가져오기
-                   - 원본 모듈의 bias 사용 (module.bias)
-                   - comm_utils는 None으로 설정
-                
-                함수 사용법:
-                - _is_attention_projection(name): Query/Key/Value projection인지 확인
-                - ColumnParallelLinear(weight, bias, comm_utils): 입력을 분할하는 병렬 선형 레이어
-                - RowParallelLinear(weight, bias, comm_utils): 출력을 분할하는 병렬 선형 레이어
-                - weights[name]['weight'][rank]: 현재 GPU(rank)의 분할된 가중치
-                - weights[name]['bias'][rank]: 현재 GPU(rank)의 분할된 bias
-                
-                주의사항: Attention의 입력 projection은 Column Parallel, 출력 projection은 Row Parallel을 사용합니다.
-                """
+                if _is_attention_projection(name):
+                    split_weight_tensor = weights[name]['weight'][rank]
+                    split_bias_tensor = None
+                    if hasattr(module, "bias") and module.bias is not None:
+                        split_bias_tensor = weights[name]['bias'][rank]
+                    modules_to_replace[name] = ColumnParallelLinear(split_weight_tensor, split_bias_tensor, None)
+                else: # This is output projection layer
+                    split_weight_tensor = weights[name]['weight'][rank]
+                    modules_to_replace[name] = RowParallelLinear(split_weight_tensor, module.bias, None)
             elif _is_lm_head(name):
                 split_weight_tensor = weights[name]['weight'][rank]
                 modules_to_replace[name] = ColumnParallelLinear(split_weight_tensor, module.bias, None, gather_output=True)
             else:
-                import pdb; pdb.set_trace()
-                # Problem 4: MLP Layer Parallelization Implementation
-                """
-                구현해야 할 내용:
-                MLP 레이어의 Up projection과 Down projection을 병렬화하세요.
-                
-                1. Up projection (첫 번째 선형 레이어):
-                   - _is_mlp_up_projection(name) 함수로 확인
-                   - ColumnParallelLinear 사용 (입력을 여러 GPU로 분할)
-                   - weights[name]['weight'][rank]로 현재 GPU의 가중치 가져오기
-                   - bias가 있는 경우 weights[name]['bias'][rank] 사용
-                   - comm_utils는 None으로 설정
-                
-                2. Down projection (두 번째 선형 레이어):
-                   - Up projection이 아닌 경우 (else 블록)
-                   - RowParallelLinear 사용 (출력을 여러 GPU로 분할)
-                   - weights[name]['weight'][rank]로 현재 GPU의 가중치 가져오기
-                   - 원본 모듈의 bias 사용 (module.bias)
-                   - comm_utils는 None으로 설정
-                
-                함수 사용법:
-                - _is_mlp_up_projection(name): MLP의 첫 번째 선형 레이어인지 확인
-                - ColumnParallelLinear(weight, bias, comm_utils): 입력을 분할하는 병렬 선형 레이어
-                - RowParallelLinear(weight, bias, comm_utils): 출력을 분할하는 병렬 선형 레이어
-                - weights[name]['weight'][rank]: 현재 GPU(rank)의 분할된 가중치
-                - weights[name]['bias'][rank]: 현재 GPU(rank)의 분할된 bias
-                
-                주의사항: MLP의 첫 번째 레이어(Up projection)는 Column Parallel, 
-                두 번째 레이어(Down projection)는 Row Parallel을 사용합니다.
-                """
+                if _is_mlp_up_projection(name):
+                    split_weight_tensor = weights[name]['weight'][rank]
+                    split_bias_tensor = None
+                    if hasattr(module, "bias") and module.bias is not None:
+                        split_bias_tensor = weights[name]['bias'][rank]
+                    modules_to_replace[name] = ColumnParallelLinear(split_weight_tensor, split_bias_tensor, None)
+                else: # This is down projection layer
+                    split_weight_tensor = weights[name]['weight'][rank]
+                    modules_to_replace[name] = RowParallelLinear(split_weight_tensor, module.bias, None)
     
     for name, new_module in modules_to_replace.items():
         module_path = name.split('.')

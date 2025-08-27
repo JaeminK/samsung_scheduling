@@ -46,7 +46,7 @@ class ModelRunner:
         self.model_name_or_path = model_name_or_path
         self.dtype = dtype 
         self.device = device
-        self.cache_dir = cache_dir
+        self.cache_dir = "/model_cache"
         self.tensor_parallel_size = tensor_parallel_size
         self.pipeline_parallel_size = pipeline_parallel_size
         self.local_rank = local_rank
